@@ -24,10 +24,10 @@
   },
   "author": "tiaanduplessis <tiaanduplessis@hotmail.com>",
   "devDependencies": {
-    "jest": "^20.0.4",
+    "jest": "^21.2.1",
     "standard": "^10.0.2",
     "husky": "^0.14.3",
-    "prettier": "~1.5.2"
+    "prettier": "~1.7.4"
   },
   "jest": {
     "testEnvironment": "node"
