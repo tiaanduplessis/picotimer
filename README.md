@@ -55,6 +55,8 @@
 
 ## About
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/tiaanduplessis/picotimer.svg)](https://greenkeeper.io/)
+
 A tiny timer that emits a "tick" event at given interval(defaults to 1 second) showing the actual time passed. Emits a "finished" event once done.
 
 ## Install
