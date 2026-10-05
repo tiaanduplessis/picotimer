@@ -4,7 +4,7 @@ const EventEmitter = require('events')
 
 const { hrtime } = process
 
-const NANOSECONDS_PER_SECOND = 1e9
+const NANOSECONDS_PER_MILLISECOND = 1e6
 const MILLISECONDS_PER_SECOND = 1000
 
 /**
@@ -46,26 +46,27 @@ class Timer extends EventEmitter {
     }
 
     this.startTime = hrtime()
-    this._timeout(this.interval)
+    this._remainingAtStart = this.remaining
     this.hasStarted = true
     this.passed = 0
+    this._timeout(Math.min(this.interval, this.remaining))
 
     return true
   }
 
   _timeout (interval) {
     this.timeout = setTimeout(() => {
-      this.passed += this.interval
-      this.remaining -= this.interval
-
-      const diff = this._calculateTimeDiff(this.passed)
-      this.interval = this.interval - diff
-      this._timeout(this.interval)
+      const passed = this._calculateTimeDiff(0)
+      this.remaining = Math.max(0, this._remainingAtStart - passed)
+      this.passed = passed
 
       if (this.hasFinished) {
         this.stop()
         this.emit('finished')
       } else {
+        // Skip missed ticks, keeping the configured interval and its original cadence.
+        const nextInterval = this.interval - passed % this.interval
+        this._timeout(Math.min(nextInterval, this.remaining))
         this.emit('tick', this.remaining)
       }
     }, interval)
@@ -73,8 +74,7 @@ class Timer extends EventEmitter {
 
   _calculateTimeDiff (passed) {
     const [seconds, nanoSeconds] = hrtime(this.startTime)
-    const actualPassedTime = seconds + nanoSeconds / NANOSECONDS_PER_SECOND
-    return actualPassedTime * MILLISECONDS_PER_SECOND - passed
+    return seconds * MILLISECONDS_PER_SECOND + nanoSeconds / NANOSECONDS_PER_MILLISECOND - passed
   }
 
   stop () {
